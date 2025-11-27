@@ -42,7 +42,6 @@ class inventory:
             item_name = item.split(",")[0]
             m = re.search(r"(\d+)", item)
             hp_restore = int(m.group(1)) if m else 0
-            
             if item_name == "Medkit":
                 hp = min(100, hp + hp_restore)
                 print(f"Used {item_name}. {hp_restore} HP restored. Current HP: {hp}")
