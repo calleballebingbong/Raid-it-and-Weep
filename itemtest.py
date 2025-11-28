@@ -1,7 +1,7 @@
 from random import randint
 import random
 import re
-items = ["Knife","Bandage","Crowbar","Medkit","Katana"]
+items = ["Flashbang","Knife","Bandage","Crowbar","Medkit","Katana"]
 inventory_system = []
 hp = 75
 class inventory:
@@ -26,6 +26,8 @@ class inventory:
             formatted = f"{item}, adds {damage} str"
         elif item in ["Medkit", "Bandage"]:
             formatted = f"{item}, restores {hp_restore} hp"
+        elif item == "Flashbang":
+            formatted = f"{item}, causes {damage} damage"
         else:
             formatted = str(item)
         inventory_system.append(formatted)
@@ -36,18 +38,22 @@ class inventory:
             removed_item = removed_item.split(",")[0]
             print(f"Removed {removed_item} from inventory.")
 
-    def use_item(self, index, hp = 0):
+    def use_item(self, index, hp = 0, damage = 0):
         if index >= 0 and index < len(inventory_system):
             item = inventory_system[index]
             item_name = item.split(",")[0]
             m = re.search(r"(\d+)", item)
             hp_restore = int(m.group(1)) if m else 0
+            damage = int(m.group(1)) if m else 0
             if item_name == "Medkit":
                 hp = min(100, hp + hp_restore)
                 print(f"Used {item_name}. {hp_restore} HP restored. Current HP: {hp}")
             elif item_name == "Bandage":
                 hp = min(100, hp + hp_restore)
                 print(f"Used {item_name}. {hp_restore} HP restored. Current HP: {hp}")
+            elif item_name in ["Flashbang"]:
+                hp = min(100, hp - damage)
+                print(f"Used {item_name}. You took {damage} damage from the blast. Current HP: {hp}")
             else:
                 print("Cannot use this item.")
                 return hp
@@ -59,7 +65,7 @@ class inventory:
 
 def lootbox():
     if random.randint(1, 10) <= 9:
-        item = random.choices(items, weights=[0.3, 0.3, 0.2, 0.1, 0.1], k=1)[0]
+        item = random.choices(items, weights=[0.25, 0.25, 0.25, 0.1, 0.1, 0.05], k=1)[0]
         if item == "Medkit":
             hp_restore = randint(15,25)
             item = f"{item}"
@@ -75,6 +81,9 @@ def lootbox():
         elif item == "Katana":
             damage = randint(11,15)
             item = f"{item}"  
+        elif item == "Flashbang":
+            damage = randint(1,10)
+            item = f"{item}"
     else:
         item = "Nothing"
         damage = 0
@@ -83,6 +92,8 @@ def lootbox():
         return item, f"You found a {item}! (+{damage} str)", damage, 0
     elif item in ["Medkit", "Bandage"]:
         return item, f"You found a {item}!(+{hp_restore} hp)", 0, hp_restore
+    elif item == "Flashbang":
+        return item, f"You found a {item}!(Causes {damage} damage)", damage, 0
     else:
         return item, "You found nothing.", 0, 0
 
@@ -97,7 +108,7 @@ while True:
                 choice4 = input("Do you want to view your inventory? (yes/no): ").lower()
                 if choice4 == 'yes':
                     inventory.show_inventory(inventory_system)
-                    while True: 
+                    for item in inventory_system:
                         use_choice = input("Do you want to use an item? (yes/no): ").lower()
                         if use_choice == 'yes':
                             while True:
@@ -105,11 +116,11 @@ while True:
                                 try:
                                     index = int(item_index) - 1
                                     if 0 <= index < len(inventory_system):
-                                        hp = inventory.use_item(inventory, index, hp = hp)
+                                        hp = inventory.use_item(inventory, index, hp = hp, damage = damage)
                                         break
                                 except ValueError:
                                     print("Invalid input. Please enter a number between 1 and 5.")
-                            break
+                                break
                         elif use_choice == 'no':
                             break
                         else:
@@ -143,26 +154,23 @@ while True:
                     print("Invalid input. Please enter 'yes' or 'no'.") 
     if choice == 'no':
         print("Exiting the lootbox system.")
-        exit()
+        break
     if choice == 'inventory':
         inventory.show_inventory(inventory_system)
-        while True: 
-            use_choice = input("Do you want to use a healing item? (yes/no): ").lower()
+        for item in inventory_system:
+            use_choice = input("Do you want to use an item? (yes/no): ").lower()
             if use_choice == 'yes':
                 while True:
                     item_index = input("Enter the number of the item you want to use (1-5): ")
                     try:
                         index = int(item_index) - 1
                         if 0 <= index < len(inventory_system):
-                            hp = inventory.use_item(inventory, index, hp = hp)
+                            hp = inventory.use_item(inventory, index, hp = hp, damage = damage)
                             break
-                    except ValueError:
+                    except ValueError:                           
                         print("Invalid input. Please enter a number between 1 and 5.")
-                break
+                    break
             elif use_choice == 'no':
                 break
             else:
                 print("Invalid input. Please enter 'yes' or 'no'.")
-
-        
-
