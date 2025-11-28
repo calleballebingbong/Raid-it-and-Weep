@@ -36,17 +36,26 @@ class Trap:
             return f"You activated an explosive mine and took {self.dmg} damage. Critical hit!"
 
     
-room_list = ["trap", "fight", "storage room"]
-door = Door(room_list)
+room_list = {"trap": 1, "fight": 2, "storage room": 3}
+options = list(room_list.keys())
+door = Door(options)
 
 print("Welcome to the door test!")
-chosen = door.random_room()
+print("You see three doors in front of you.")
+
+
+choice = input("Which door do you want to choose? (press enter for random): ")
+
+if choice in ("1", "2", "3"):
+    chosen = options[int(choice) - 1]
+elif choice in options:
+    chosen = choice
+else:
+    print("Invalid choice — choosing a random door instead.")
+    chosen = door.random_room()
 
 print(door.enter(chosen))
 if chosen == "trap":
     trap = Trap()
     damage = trap.activate()
     print(trap.description())
-    
-    
-    
