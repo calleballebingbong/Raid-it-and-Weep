@@ -4,6 +4,7 @@ import re
 items = ["Flashbang","Knife","Bandage","Crowbar","Medkit","Katana"]
 inventory_system = []
 hp = 75
+damage = 5
 class inventory:
     def __init__(self, item, display, index, damage=0, hp_restore=0, hp=100):
         self.item = item
@@ -152,6 +153,7 @@ while True:
                     break
                 else: 
                     print("Invalid input. Please enter 'yes' or 'no'.") 
+        break
     if choice == 'no':
         print("Exiting the lootbox system.")
         break
@@ -174,3 +176,4 @@ while True:
                 break
             else:
                 print("Invalid input. Please enter 'yes' or 'no'.")
+        break
