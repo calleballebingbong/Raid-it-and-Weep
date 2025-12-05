@@ -24,7 +24,8 @@ class Player: #player class
         self.strength = strength
         self.level = level
         self.xp = xp
-        self.damage_multiplier = 1.0   # <-- add this
+        self.damage_multiplier = 1.0 
+        self.health_multiplier = level
     
     def player_status(self): #om player lever/print stats
         if self.hp > 0:
@@ -230,12 +231,39 @@ items = ["Flashbang","Knife","Bandage","Crowbar","Medkit","Katana"]
 inventory_system = []
 inv = inventory("", "", 0)
 
-# Game loop
-print(player.player_status()) 
-    
+# Game loop 
 
 while player.hp >= 0:
     door_chance = randint(1, 4) 
+    print(player.player_status()) 
+    while True:
+                    print("What do you want to do?")
+                    while True:
+                        view_inv = input("[I]nventory or continue?[ENTER]:")
+                        if view_inv.lower() == "i":
+                            inv.show_inventory() 
+                            if inventory_system:
+                                use_item = input("Use and [I]tem or go back?[ENTER]:")
+                                if use_item.lower() == 'i':
+                                    try:
+                                        index = int(input("Which item do you want to use? [1-4]:")) - 1
+                                        if 0 <= index < len(inventory_system):
+                                            inv.use_item(index, player)  # pass player instance
+                                            print(f"Current HP: {player.hp}, Damage Multiplier: {getattr(player,'damage_multiplier',1.0)}x")
+                                        
+                                        else:
+                                            print("Invalid input.")
+                                    except ValueError:
+                                        print("Invalid input.")
+                                else:
+                                    break
+                            else:
+                                continue
+                        elif view_inv.lower() == '':
+                            break
+                        else:
+                            print("Invalid input.")
+                    break
     print("You see three doors in front of you:")
     while rand_door_desc <= 3:
         description = random.choice(description_list)
@@ -261,7 +289,6 @@ while player.hp >= 0:
         damage = trap.activate()
         trap.make_damage(player)
         print(trap.description())
-        print(player.player_status())
         if player.player_check() == True:
             restart = input("Do you want to restart? (yes/no): ")
             if restart.lower() == "no":
@@ -286,27 +313,36 @@ while player.hp >= 0:
                 print("You ran away safely!")
                 break
             elif turn_choice == "2":
-                inv.show_inventory()                 # use the instance
-                use_choice = input("Do you want to use an item? (yes/no): ").lower()
-                if use_choice == 'yes':
-                    item_index = input("Enter the number of the item you want to use: ")
-                    try:
-                        index = int(item_index) - 1
-                        if 0 <= index < len(inventory_system):
-                            inv.use_item(index, player)  # pass instance 'inv' and player instance
-                        else:
-                            print("Index out of range.")
-                    except ValueError:
-                        print("Invalid input. Please enter a number.")
+                inv.show_inventory()
+                if inventory_system:
+                    use_choice = input("Do you want to use an item? (yes/no): ").lower()
+                    if use_choice == 'yes':
+                        item_index = input("Enter the number of the item you want to use: ")
+                        try:
+                            index = int(item_index) - 1
+                            if 0 <= index < len(inventory_system):
+                                inv.use_item(index, player)  # pass instance 'inv' and player instance
+                            else:
+                                print("Index out of range.")
+                        except ValueError:
+                            print("Invalid input. Please enter a number.")
+                else:
+                    continue
             elif turn_choice == "1":
                 base = randint(player.strength, player.strength * 5)
-                player_damage = int(base * player.damage_multiplier)  # <-- apply multiplier
+                player_damage = int(base * player.damage_multiplier)
                 print(player.take_damage(enemy.attack()))
                 print(f"You attack for {player_damage} damage!")
                 if enemy.take_damage(player_damage):
                     xp_gained = enemies_list[enemy.name] * 15
                     print(f"You defeated the {enemy.name}!")
-                    print(player.gain_xp(xp_gained))
+                    xp_message = player.gain_xp(xp_gained)
+                    print(xp_message)
+                    # check if leveled up
+                    if "leveled up" in xp_message.lower():
+                        health_gain = 50 * player.level  # add 50 HP per level
+                        player.hp = min(player.hp + health_gain, 1000)  # cap at max 1000
+                        print(f"[yellow]Health increased by {health_gain}! New HP: {player.hp}[/yellow]")
                     break
                 else:
                     print(f"The {enemy.name} has {enemy.hp} HP left.")
@@ -331,7 +367,10 @@ while player.hp >= 0:
     elif chosen == "storage room":
                 item, description, damage, hp_restore = lootbox()
                 print(description)
-                inv.add_to_inventory(item, damage, hp_restore)
+                if item is not None:
+                    inv.add_to_inventory(item, damage, hp_restore)
+                else:
+                    continue
 
                 while True:
                     print("What do you want to do?")
