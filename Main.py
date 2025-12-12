@@ -19,7 +19,7 @@ print("[green]You entered the room[/]")
 
 
 class Player: #player class
-    def __init__(self, hp=100, strength=1, level=1, xp=0,): #player stats
+    def __init__(self, hp=1000, strength=1, level=1, xp=0,): #player stats
         self.hp = hp
         self.strength = strength
         self.level = level
@@ -88,7 +88,7 @@ class Door: #dörr class
         elif room == "fight":
             return "You have entered a [bold red]fight[/bold red] room! Prepare for battle!"
         elif room == "storage room":
-            return "You have entered a [bold purple] storage [/bold purple] room! You found some items!"
+            return "You have entered a [bold purple] storage [/bold purple] room! You might find something useful here."
     
     def description(self, description): #dörr beskrivning
         return "You open a door that leads to a " + description + " room."
@@ -156,10 +156,8 @@ class inventory:
             value = int(m.group(1)) if m else 0
             
             if item_name == "Medkit":
-                Player.hp = min(100, Player.hp + value)
                 print(f"Used {item_name}. {value} HP restored. Current HP: {Player.hp}")
             elif item_name == "Bandage":
-                Player.hp = min(100, Player.hp + value)
                 print(f"Used {item_name}. {value} HP restored. Current HP: {Player.hp}")
             elif item_name in ["Knife", "Crowbar", "Katana"]:
                 multiplier_increase = value * 0.1
@@ -234,7 +232,7 @@ inv = inventory("", "", 0)
 # Game loop 
 
 while player.hp >= 0:
-    door_chance = randint(1, 4) 
+    door_chance = randint(1, 5) 
     print(player.player_status()) 
     while True:
                     print("What do you want to do?")
@@ -272,7 +270,7 @@ while player.hp >= 0:
     rand_door_desc = 1
     choice = input("Which door do you want to choose? (press enter for random): ")
     if choice in ("1", "2", "3"):
-        if door_chance == 4:
+        if door_chance >= 5:
             chosen = "storage room"
         elif door_chance == 3:
             chosen = "trap"
@@ -281,9 +279,8 @@ while player.hp >= 0:
     else:
         print("Invalid choice — choosing a random door instead.")
         chosen = door.random_room()
-    print(door.description(description))
 
-    print(f"[green] {door.enter(chosen)} [/] ") #color test
+    print(f"[green] {door.enter(chosen)} [/] ")
     if chosen == "trap":
         trap = Trap()
         damage = trap.activate()
@@ -386,14 +383,39 @@ while player.hp >= 0:
             else:
                 print("Invalid choice, try again.")
     elif chosen == "storage room":
-                item, description, damage, hp_restore = lootbox()
-                print(description)
-                if item is not None:
-                    inv.add_to_inventory(item, damage, hp_restore)
-                else:
-                    continue
+        if len(inventory_system) >= 5:
+            item, description, damage, hp_restore = lootbox()
+            print(description)
+            print("Your inventory is full.")
+            inventory.show_inventory(inventory_system)
+            while True:
+                choice2 = input("Do you want to discard an item to make space? (yes/no): ").lower()
+                if choice2 == 'yes':
+                    while True:
+                        choice3 = input("Enter a number between 1 - 5 for the item you want to discard: ")
+                        try:
+                            index = int(choice3) - 1
+                            if 0 <= index < len(inventory_system):
+                                inventory.discard_from_inventory(inventory, index)
+                                inventory.add_to_inventory(inventory, item, damage, hp_restore)
+                                break
+                        except ValueError:
+                            print("Invalid input. Please enter a number between 1 and 5.")
+                    break
+                elif choice2 == 'no':
+                    print("You chose not to discard any items.")   
+                    break
+                else: 
+                    print("Invalid input. Please enter 'yes' or 'no'.") 
+        else:
+            item, description, damage, hp_restore = lootbox()
+            print(description)
+            if item is not None:
+                inv.add_to_inventory(item, damage, hp_restore)
+            else:
+                continue
 
-                while True:
+            while True:
                     print("What do you want to do?")
                     while True:
                         view_inv = input("[I]nventory or exit the room?[ENTER]:")
@@ -416,3 +438,14 @@ while player.hp >= 0:
                         else:
                             print("Invalid input.")
                     break
+restart = input("Do you want to restart? (yes/no): ")
+if restart.lower() == "no":
+    print("Game Over!")
+    exit()
+else:
+    print("You chose to restart the game!")
+    player.hp = 100
+    player.level = 1
+    player.xp = 0
+    player.strength = 1
+    inventory_system = []
