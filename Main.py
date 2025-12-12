@@ -19,7 +19,7 @@ print("[green]You entered the room[/]")
 
 
 class Player: #player class
-    def __init__(self, hp=1000, strength=1, level=1, xp=0,): #player stats
+    def __init__(self, hp=100, strength=1, level=1, xp=0,): #player stats
         self.hp = hp
         self.strength = strength
         self.level = level
@@ -57,7 +57,7 @@ class Enemy: #enemy class
     def __init__(self, name, hp_multiplier):  #enemy stats
         self.name = name
         self.hp_multiplier = hp_multiplier
-        self.hp = hp_multiplier * 20
+        self.hp = hp_multiplier * 5
     
     def take_damage(self, damage): #om enemy tar skada
         self.hp -= damage
@@ -95,7 +95,7 @@ class Door: #dörr class
 
         
 class Trap: #trap class
-    def __init__(self, min_dmg=10, max_dmg=30): #trap skada (min max)
+    def __init__(self, min_dmg=5, max_dmg=15): #trap skada (min max)
         self.min_dmg = min_dmg
         self.max_dmg = max_dmg
         self.dmg = 0
@@ -107,9 +107,9 @@ class Trap: #trap class
         return self.dmg
 
     def description(self): #trap beskrivning baserat på skada
-        if self.dmg <= 15:
+        if self.dmg <= 5:
             return f"You activated a tripwire and took [bold red]{self.dmg} damage.[/bold red] It was just a scratch."
-        elif self.dmg <= 25:
+        elif self.dmg <= 10:
             return f"You activated a shrapnel trap and took [bold red]{self.dmg} damage.[/bold red] You're hurt, bandage up!"
         else:
             return f"You activated an explosive mine and took [bold red]{self.dmg} damage.[/bold red] [yellow]Critical[/yellow] hit!"
@@ -216,7 +216,7 @@ def lootbox():
 
 # Initialize
 player = Player() #create player
-enemies_list = {"goblin": 1, "troll": 2, "dragon": 3} #create enemies bibliotek, ("namn": hp_multiplier)
+enemies_list = {"Delinquent": 1, "Crook": 1.5, "Goon": 2, "Brute": 2.5, "Boss": 3 } #create enemies bibliotek, ("namn": hp_multiplier)
 random_enemy_name = list(enemies_list.keys())[randint(0, 2)] #välj random enemy
 enemy = Enemy(random_enemy_name, enemies_list[random_enemy_name]) #create enemy object
 room_list = {"trap": 1, "fight": 2, "storage room": 3}
@@ -246,7 +246,7 @@ while player.hp >= 0:
                                 use_item = input("Use and [I]tem or go back?[ENTER]:")
                                 if use_item.lower() == 'i':
                                     try:
-                                        index = int(input("Which item do you want to use? [1-4]:")) - 1
+                                        index = int(input("Which item do you want to use? [1-6]:")) - 1
                                         if 0 <= index < len(inventory_system):
                                             inv.use_item(index, player)  # pass player instance
                                             print(f"Current HP: {player.hp}, Damage Multiplier: {getattr(player,'damage_multiplier',1.0)}x")
@@ -303,15 +303,33 @@ while player.hp >= 0:
                 print(player.player_status())
 
     elif chosen == "fight":
-        random_enemy_name = list(enemies_list.keys())[randint(0, 2)]
+        if player.level <= 3:
+            random_enemy_name = list(enemies_list.keys())[randint(0, 2)]
+        elif player.level <= 5:
+            random_enemy_name = list(enemies_list.keys())[randint(0, 4)]
+        elif player.level == 10:
+            random_enemy_name = "Boss"
+            type_text("[bold red] Did you really think you could get passed us that easily? Prepare to meet your end! [/bold red]", 0.05)
+            print("[bold red] Prepare for a boss fight! [/bold red]")
+        else:
+            random_enemy_name = list(enemies_list.keys())[randint(0, len(enemies_list)-1)]
+
         enemy = Enemy(random_enemy_name, enemies_list[random_enemy_name])
         print(player.player_status()) 
-        print(f"The {enemy.name} appears!")
+        print(f"A {enemy.name} appears!")
         while player.hp >= 0:
+            flee_chance = randint(1, 3)
             turn_choice = turn_system()
             if turn_choice == "3":
-                print("You ran away safely!")
-                break
+                flee_chance = randint(1, 3)
+                if flee_chance != 3:
+                    print("You failed to run away!")
+                    base = randint(player.strength, player.strength * 5)
+                    player_damage = int(base * player.damage_multiplier)
+                    print(player.take_damage(enemy.attack()))
+                else:
+                    print("You ran away safely!")
+                    break
             elif turn_choice == "2":
                 inv.show_inventory()
                 if inventory_system:
@@ -321,7 +339,10 @@ while player.hp >= 0:
                         try:
                             index = int(item_index) - 1
                             if 0 <= index < len(inventory_system):
-                                inv.use_item(index, player)  # pass instance 'inv' and player instance
+                                inv.use_item(index, player)
+                                base = randint(player.strength, player.strength * 5)
+                                player_damage = int(base * player.damage_multiplier)
+                                print(player.take_damage(enemy.attack()))
                             else:
                                 print("Index out of range.")
                         except ValueError:
@@ -333,7 +354,7 @@ while player.hp >= 0:
                 player_damage = int(base * player.damage_multiplier)
                 print(player.take_damage(enemy.attack()))
                 print(f"You attack for {player_damage} damage!")
-                if enemy.take_damage(player_damage):
+                if enemy.take_damage(player_damage) and player.hp > 0:
                     xp_gained = enemies_list[enemy.name] * 15
                     print(f"You defeated the {enemy.name}!")
                     xp_message = player.gain_xp(xp_gained)
@@ -341,7 +362,7 @@ while player.hp >= 0:
                     # check if leveled up
                     if "leveled up" in xp_message.lower():
                         health_gain = 50 * player.level  # add 50 HP per level
-                        player.hp = min(player.hp + health_gain, 1000)  # cap at max 1000
+                        player.hp = min(player.hp + health_gain, 500)  # cap at max 500
                         print(f"[yellow]Health increased by {health_gain}! New HP: {player.hp}[/yellow]")
                     break
                 else:
@@ -358,10 +379,10 @@ while player.hp >= 0:
                         player.level = 1
                         player.xp = 0
                         player.strength = 1
-                        print(player.player_status())
+                        inventory_system = []
                         break
                 else:
-                    input("Press Enter to continue...")
+                    continue
             else:
                 print("Invalid choice, try again.")
     elif chosen == "storage room":
@@ -383,9 +404,7 @@ while player.hp >= 0:
                                 try:
                                     index = int(input("Which item do you want to use? [1-4]:")) - 1
                                     if 0 <= index < len(inventory_system):
-                                        inv.use_item(index, player)  # pass player instance
-                                        print(f"Current HP: {player.hp}, Damage Multiplier: {getattr(player,'damage_multiplier',1.0)}x")
-                                    
+                                        inv.use_item(index, player)  # pass player instance                                    
                                     else:
                                         print("Invalid input.")
                                 except ValueError:
