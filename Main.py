@@ -1,5 +1,6 @@
 import random
 from random import randint
+import os
 import re
 import time
 from rich import print
@@ -12,14 +13,9 @@ def type_text(text, delay): #typewriter effect
         time.sleep(delay)
     print()
 
-type_text(f.renderText("RAID IT AND WEEP!"), 0.001)
-print("[green]You entered the room[/]")
-
-
-
 
 class Player: #player class
-    def __init__(self, hp=1000, strength=1, level=1, xp=0,): #player stats
+    def __init__(self, hp=1000, strength=1, level=10, xp=0,): #player stats
         self.hp = hp
         self.strength = strength
         self.level = level
@@ -228,143 +224,104 @@ rand_door_desc = 1
 items = ["Flashbang","Knife","Bandage","Crowbar","Medkit","Katana"]
 inventory_system = []
 inv = inventory("", "", 0)
+boss_encountered = False
 
 # Game loop 
+os.system('cls')
+type_text("Welcome to...", 0.05)
+time.sleep(2)
+os.system('cls')
+type_text(f.renderText("RAID IT AND WEEP!"), 0.001)
+os.system('cls')
+time.sleep(0.5)
+
+for _ in range(3):
+    print(f.renderText("RAID IT AND WEEP!"))
+    print("Loading [bold green]GAME![/bold green]")
+    time.sleep(0.5)
+    os.system('cls')
+    time.sleep(0.5)
+
+type_text("Incoming transmission...", 0.05)
+time.sleep(1)
+os.system('cls')
+type_text("Greetings, operative. You have been tasked with infiltrating a hostile facility teeming with dangerous enemies and traps.", 0.03)
+time.sleep(1)
+os.system('cls')
+type_text("Your objective is to navigate through a series of rooms, each presenting unique challenges and opportunities.", 0.03)
+time.sleep(1)
+os.system('cls')
+type_text("You main mission is to take down infamous drug Kingpin Tony 'The Tiger' Félino who is rumored to be hiding in the depths of this complex.", 0.03)
+time.sleep(1)
+os.system('cls')
+type_text("Be cautious, and remember to complete your mission.", 0.03)
+time.sleep(0.5)
+os.system('cls')
+type_text("Good luck, operative. The fate of the operation rests in your hands.", 0.03)
+type_text("Seargent Hawk out.", 0.05)
+time.sleep(2)
+os.system('cls')
+
 
 while player.hp >= 0:
-    door_chance = randint(1, 5) 
-    print(player.player_status()) 
-    while True:
-                    print("What do you want to do?")
-                    while True:
-                        view_inv = input("[I]nventory or continue?[ENTER]:")
-                        if view_inv.lower() == "i":
-                            inv.show_inventory() 
-                            if inventory_system:
-                                use_item = input("Use and [I]tem or go back?[ENTER]:")
-                                if use_item.lower() == 'i':
-                                    try:
-                                        index = int(input("Which item do you want to use? [1-6]:")) - 1
-                                        if 0 <= index < len(inventory_system):
-                                            inv.use_item(index, player)  # pass player instance
-                                            print(f"Current HP: {player.hp}, Damage Multiplier: {getattr(player,'damage_multiplier',1.0)}x")
-                                        
-                                        else:
-                                            print("Invalid input.")
-                                    except ValueError:
-                                        print("Invalid input.")
-                                else:
-                                    break
-                            else:
-                                continue
-                        elif view_inv.lower() == '':
-                            break
-                        else:
-                            print("Invalid input.")
-                    break
-    print("You see three doors in front of you:")
-    while rand_door_desc <= 3:
-        description = random.choice(description_list)
-        print(f"[bold] A door leading to a {description} room.[{rand_door_desc}] [/bold]")
-        rand_door_desc += 1
-    rand_door_desc = 1
-    choice = input("Which door do you want to choose? (press enter for random): ")
-    if choice in ("1", "2", "3"):
-        if door_chance >= 5:
-            chosen = "storage room"
-        elif door_chance == 3:
-            chosen = "trap"
-        else:
-            chosen = "fight"
+    if boss_encountered:
+        print("[bold green] Congratulations! You have defeated the boss and completed your mission! [/bold green]")
+        break
     else:
-        print("Invalid choice — choosing a random door instead.")
-        chosen = door.random_room()
-
-    print(f"[green] {door.enter(chosen)} [/] ")
-    if chosen == "trap":
-        trap = Trap()
-        damage = trap.activate()
-        trap.make_damage(player)
-        print(trap.description())
-        if player.player_check() == True:
-            restart = input("Do you want to restart? (yes/no): ")
-            if restart.lower() == "no":
-                print("Game Over!")
-                exit()
+            door_chance = randint(1, 5) 
+            print(player.player_status()) 
+            while True:
+                            print("What do you want to do?")
+                            while True:
+                                view_inv = input("[I]nventory or continue?[ENTER]:")
+                                if view_inv.lower() == "i":
+                                    inv.show_inventory() 
+                                    if inventory_system:
+                                        use_item = input("Use and [I]tem or go back?[ENTER]:")
+                                        if use_item.lower() == 'i':
+                                            try:
+                                                index = int(input("Which item do you want to use? [1-6]:")) - 1
+                                                if 0 <= index < len(inventory_system):
+                                                    inv.use_item(index, player)  # pass player instance
+                                                    print(f"Current HP: {player.hp}, Damage Multiplier: {getattr(player,'damage_multiplier',1.0)}x")
+                                                
+                                                else:
+                                                    print("Invalid input.")
+                                            except ValueError:
+                                                print("Invalid input.")
+                                        else:
+                                            break
+                                    else:
+                                        continue
+                                elif view_inv.lower() == '':
+                                    break
+                                else:
+                                    print("Invalid input.")
+                            break
+            print("You see three doors in front of you:")
+            while rand_door_desc <= 3:
+                description = random.choice(description_list)
+                print(f"[bold] A door leading to a {description} room.[{rand_door_desc}] [/bold]")
+                rand_door_desc += 1
+            rand_door_desc = 1
+            choice = input("Which door do you want to choose? (press enter for random): ")
+            if choice in ("1", "2", "3"):
+                if door_chance >= 5:
+                    chosen = "storage room"
+                elif door_chance == 3:
+                    chosen = "trap"
+                else:
+                    chosen = "fight"
             else:
-                print("You chose to restart the game!")
-                player.hp = 100
-                player.level = 1
-                player.xp = 0
-                player.strength = 1
-                print(player.player_status())
+                print("Invalid choice — choosing a random door instead.")
+                chosen = door.random_room()
 
-    elif chosen == "fight":
-        if player.level <= 3:
-            random_enemy_name = list(enemies_list.keys())[randint(0, 2)]
-        elif player.level <= 5:
-            random_enemy_name = list(enemies_list.keys())[randint(0, 4)]
-        elif player.level == 10:
-            random_enemy_name = "Boss"
-            type_text("[bold red] Did you really think you could get passed us that easily? Prepare to meet your end! [/bold red]", 0.05)
-            print("[bold red] Prepare for a boss fight! [/bold red]")
-        else:
-            random_enemy_name = list(enemies_list.keys())[randint(0, len(enemies_list)-1)]
-
-        enemy = Enemy(random_enemy_name, enemies_list[random_enemy_name])
-        print(player.player_status()) 
-        print(f"A {enemy.name} appears!")
-        while player.hp >= 0:
-            flee_chance = randint(1, 3)
-            turn_choice = turn_system()
-            if turn_choice == "3":
-                flee_chance = randint(1, 3)
-                if flee_chance != 3:
-                    print("You failed to run away!")
-                    base = randint(player.strength, player.strength * 5)
-                    player_damage = int(base * player.damage_multiplier)
-                    print(player.take_damage(enemy.attack()))
-                else:
-                    print("You ran away safely!")
-                    break
-            elif turn_choice == "2":
-                inv.show_inventory()
-                if inventory_system:
-                    use_choice = input("Do you want to use an item? (yes/no): ").lower()
-                    if use_choice == 'yes':
-                        item_index = input("Enter the number of the item you want to use: ")
-                        try:
-                            index = int(item_index) - 1
-                            if 0 <= index < len(inventory_system):
-                                inv.use_item(index, player)
-                                base = randint(player.strength, player.strength * 5)
-                                player_damage = int(base * player.damage_multiplier)
-                                print(player.take_damage(enemy.attack()))
-                            else:
-                                print("Index out of range.")
-                        except ValueError:
-                            print("Invalid input. Please enter a number.")
-                else:
-                    continue
-            elif turn_choice == "1":
-                base = randint(player.strength, player.strength * 5)
-                player_damage = int(base * player.damage_multiplier)
-                print(player.take_damage(enemy.attack()))
-                print(f"You attack for {player_damage} damage!")
-                if enemy.take_damage(player_damage) and player.hp > 0:
-                    xp_gained = enemies_list[enemy.name] * 15
-                    print(f"You defeated the {enemy.name}!")
-                    xp_message = player.gain_xp(xp_gained)
-                    print(xp_message)
-                    # check if leveled up
-                    if "leveled up" in xp_message.lower():
-                        health_gain = 50 * player.level  # add 50 HP per level
-                        player.hp = min(player.hp + health_gain, 500)  # cap at max 500
-                        print(f"[yellow]Health increased by {health_gain}! New HP: {player.hp}[/yellow]")
-                    break
-                else:
-                    print(f"The {enemy.name} has {enemy.hp} HP left.")
-                print(player.player_status())
+            print(f"[green] {door.enter(chosen)} [/] ")
+            if chosen == "trap":
+                trap = Trap()
+                damage = trap.activate()
+                trap.make_damage(player)
+                print(trap.description())
                 if player.player_check() == True:
                     restart = input("Do you want to restart? (yes/no): ")
                     if restart.lower() == "no":
@@ -376,76 +333,158 @@ while player.hp >= 0:
                         player.level = 1
                         player.xp = 0
                         player.strength = 1
-                        inventory_system = []
-                        break
-                else:
-                    continue
-            else:
-                print("Invalid choice, try again.")
-    elif chosen == "storage room":
-        if len(inventory_system) >= 5:
-            item, description, damage, hp_restore = lootbox()
-            print(description)
-            print("Your inventory is full.")
-            inventory.show_inventory(inventory_system)
-            while True:
-                choice2 = input("Do you want to discard an item to make space? (yes/no): ").lower()
-                if choice2 == 'yes':
-                    while True:
-                        choice3 = input("Enter a number between 1 - 5 for the item you want to discard: ")
-                        try:
-                            index = int(choice3) - 1
-                            if 0 <= index < len(inventory_system):
-                                inventory.discard_from_inventory(inventory, index)
-                                inventory.add_to_inventory(inventory, item, damage, hp_restore)
-                                break
-                        except ValueError:
-                            print("Invalid input. Please enter a number between 1 and 5.")
-                    break
-                elif choice2 == 'no':
-                    print("You chose not to discard any items.")   
-                    break
-                else: 
-                    print("Invalid input. Please enter 'yes' or 'no'.") 
-        else:
-            item, description, damage, hp_restore = lootbox()
-            print(description)
-            if item is not None:
-                inv.add_to_inventory(item, damage, hp_restore)
-            else:
-                continue
+                        print(player.player_status())
 
-            while True:
-                    print("What do you want to do?")
-                    while True:
-                        view_inv = input("[I]nventory or exit the room?[ENTER]:")
-                        if view_inv.lower() == "i":
-                            inv.show_inventory()  # pass self automatically
-                            use_item = input("Use and [I]tem or go back?[ENTER]:")
-                            if use_item.lower() == 'i':
+            elif chosen == "fight":
+                if player.level <= 3:
+                    random_enemy_name = list(enemies_list.keys())[randint(0, 2)]
+                elif player.level <= 5:
+                    random_enemy_name = list(enemies_list.keys())[randint(0, 4)]
+                elif player.level == 10:
+                    random_enemy_name = "Boss"
+                    boss_encountered = True
+                    type_text("[bold red] Did you really think you could get passed us that easily? Prepare to meet your end! [/bold red]", 0.05)
+                    print("[bold red] Prepare for a boss fight! [/bold red]")
+                else:
+                    random_enemy_name = list(enemies_list.keys())[randint(0, len(enemies_list)-1)]
+
+                enemy = Enemy(random_enemy_name, enemies_list[random_enemy_name])
+                print(player.player_status()) 
+                print(f"A {enemy.name} appears!")
+                while player.hp >= 0:
+                    flee_chance = randint(1, 3)
+                    turn_choice = turn_system()
+                    if turn_choice == "3":
+                        flee_chance = randint(1, 3)
+                        if flee_chance != 3 or enemy.name == "Boss":
+                            print("You failed to run away!")
+                            base = randint(player.strength, player.strength * 5)
+                            player_damage = int(base * player.damage_multiplier)
+                            print(player.take_damage(enemy.attack()))
+                        else:
+                            print("You ran away safely!")
+                            break
+                    elif turn_choice == "2":
+                        inv.show_inventory()
+                        if inventory_system:
+                            use_choice = input("Do you want to use an item? (yes/no): ").lower()
+                            if use_choice == 'yes':
+                                item_index = input("Enter the number of the item you want to use: ")
                                 try:
-                                    index = int(input("Which item do you want to use? [1-4]:")) - 1
+                                    index = int(item_index) - 1
                                     if 0 <= index < len(inventory_system):
-                                        inv.use_item(index, player)  # pass player instance                                    
+                                        inv.use_item(index, player)
+                                        base = randint(player.strength, player.strength * 5)
+                                        player_damage = int(base * player.damage_multiplier)
+                                        print(player.take_damage(enemy.attack()))
                                     else:
-                                        print("Invalid input.")
+                                        print("Index out of range.")
                                 except ValueError:
-                                    print("Invalid input.")
-                            else:
-                                break
-                        elif view_inv.lower() == '':
+                                    print("Invalid input. Please enter a number.")
+                        else:
+                            continue
+                    elif turn_choice == "1":
+                        base = randint(player.strength, player.strength * 5)
+                        player_damage = int(base * player.damage_multiplier)
+                        print(player.take_damage(enemy.attack()))
+                        print(f"You attack for {player_damage} damage!")
+                        if enemy.take_damage(player_damage) and player.hp > 0:
+                            xp_gained = enemies_list[enemy.name] * 15
+                            print(f"You defeated the {enemy.name}!")
+                            xp_message = player.gain_xp(xp_gained)
+                            print(xp_message)
+                            # check if leveled up
+                            if "leveled up" in xp_message.lower():
+                                health_gain = 50 * player.level  # add 50 HP per level
+                                player.hp = min(player.hp + health_gain, 500)  # cap at max 500
+                                print(f"[yellow]Health increased by {health_gain}! New HP: {player.hp}[/yellow]")
                             break
                         else:
-                            print("Invalid input.")
-                    break
-restart = input("Do you want to restart? (yes/no): ")
-if restart.lower() == "no":
-    print("Game Over!")
-    exit()
-else:
-    print("You chose to restart the game!")
-    player.hp = 100
-    player.level = 1
-    player.xp = 0
-    player.strength = 1
-    inventory_system = []
+                            print(f"The {enemy.name} has {enemy.hp} HP left.")
+                        print(player.player_status())
+                        if player.player_check() == True:
+                            restart = input("Do you want to restart? (yes/no): ")
+                            if restart.lower() == "no":
+                                print("Game Over!")
+                                exit()
+                            else:
+                                print("You chose to restart the game!")
+                                player.hp = 100
+                                player.level = 1
+                                player.xp = 0
+                                player.strength = 1
+                                inventory_system = []
+                                break
+                        else:
+                            continue
+                    else:
+                        print("Invalid choice, try again.")
+            elif chosen == "storage room":
+                if len(inventory_system) >= 5:
+                    item, description, damage, hp_restore = lootbox()
+                    print(description)
+                    print("Your inventory is full.")
+                    inventory.show_inventory(inventory_system)
+                    while True:
+                        choice2 = input("Do you want to discard an item to make space? (yes/no): ").lower()
+                        if choice2 == 'yes':
+                            while True:
+                                choice3 = input("Enter a number between 1 - 5 for the item you want to discard: ")
+                                try:
+                                    index = int(choice3) - 1
+                                    if 0 <= index < len(inventory_system):
+                                        inventory.discard_from_inventory(inventory, index)
+                                        inventory.add_to_inventory(inventory, item, damage, hp_restore)
+                                        break
+                                except ValueError:
+                                    print("Invalid input. Please enter a number between 1 and 5.")
+                            break
+                        elif choice2 == 'no':
+                            print("You chose not to discard any items.")   
+                            break
+                        else: 
+                            print("Invalid input. Please enter 'yes' or 'no'.") 
+                else:
+                    item, description, damage, hp_restore = lootbox()
+                    print(description)
+                    if item is not None:
+                        inv.add_to_inventory(item, damage, hp_restore)
+                    else:
+                        continue
+
+                    while True:
+                            print("What do you want to do?")
+                            while True:
+                                view_inv = input("[I]nventory or exit the room?[ENTER]:")
+                                if view_inv.lower() == "i":
+                                    inv.show_inventory()  # pass self automatically
+                                    use_item = input("Use and [I]tem or go back?[ENTER]:")
+                                    if use_item.lower() == 'i':
+                                        try:
+                                            index = int(input("Which item do you want to use? [1-4]:")) - 1
+                                            if 0 <= index < len(inventory_system):
+                                                inv.use_item(index, player)  # pass player instance                                    
+                                            else:
+                                                print("Invalid input.")
+                                        except ValueError:
+                                            print("Invalid input.")
+                                    else:
+                                        break
+                                elif view_inv.lower() == '':
+                                    break
+                                else:
+                                    print("Invalid input.")
+                            break
+            
+            
+    restart = input("Do you want to restart? (yes/no): ")
+    if restart.lower() == "no":
+        print("Game Over!")
+        exit()
+    else:
+        print("You chose to restart the game!")
+        player.hp = 100
+        player.level = 1
+        player.xp = 0
+        player.strength = 1
+        inventory_system = []
